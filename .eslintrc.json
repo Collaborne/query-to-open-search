@@ -1,0 +1,16 @@
+{
+	"extends": "eslint-config-collaborne",
+	"parserOptions": {
+		"project": "./tsconfig.json",
+		"tsconfigRootDir": "./"
+	},
+	"overrides": [
+		{
+			"files": ["**/*.spec.ts"],
+			"parserOptions": {
+				"project": "./tsconfig.test.json",
+				"tsconfigRootDir": "./"
+			}
+		}
+	]
+}

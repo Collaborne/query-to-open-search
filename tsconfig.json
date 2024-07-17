@@ -1,0 +1,12 @@
+{
+	"extends": "tsconfig-collaborne",
+	"compilerOptions": {
+		"declaration": true,
+		"noEmit": false,
+		"types": ["node", "jest"],
+		"outDir": "./lib",
+		"skipLibCheck": true
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "lib", "lib-test", "src/*/__tests__/*"]
+}

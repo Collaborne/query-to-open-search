@@ -1,0 +1,59 @@
+{
+	"name": "query-to-open-search",
+	"version": "0.0.1",
+	"description": "Translates query strings into OpenSearch queries",
+	"main": "lib/index.js",
+	"source": "src/index.ts",
+	"scripts": {
+		"build": "tsc",
+		"lint": "eslint 'src/**/*.ts'",
+		"lint:fix": "eslint --fix 'src/**/*.ts'",
+		"build:watch": "tsc-watch --noEmit false --onSuccess \"yalc push --watch\"",
+		"test": "npm run lint && tsc --project tsconfig.test.json && jest",
+		"prepack": "cp package-lock.json npm-shrinkwrap.json",
+		"postpack": "rm -f npm-shrinkwrap.json",
+		"preversion": "echo ${npm_package_version} > .preversion.txt; zip -q .preversion-backup.zip package.json package-lock.json",
+		"version:review-history": "test -d .git && git log --oneline $(git describe --abbrev=0)^...; echo \"Ok to create version '${npm_package_version}' (currently '${npm_config_old_package_version}')? (y/n)?\"; read -r CONFIRM && echo \"${CONFIRM}\" | grep -e '^[yY]$' >/dev/null 2>&1",
+		"version": "test \"${SKIP_REVIEW_HISTORY}\" = \"true\" || npm run -s version:review-history --old_package_version=$(cat .preversion.txt) || (unzip -oq .preversion-backup.zip; rm -f .preversion.txt .preversion-backup.zip)",
+		"postversion": "rm -f .preversion.txt .preversion-backup.zip"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Collaborne/query-to-open-search.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Collaborne/query-to-open-search/issues"
+	},
+	"homepage": "https://github.com/Collaborne/query-to-open-search#readme",
+	"keywords": [],
+	"author": "Ronny Roeller <ronny@nextapp.co> (nextapp.co)",
+	"license": "ISC",
+	"files": [
+		"lib",
+		"tsconfig.json"
+	],
+	"devDependencies": {
+		"@types/jest": "^29.5.12",
+		"@types/node": "^20.14.11",
+		"eslint-config-collaborne": "^5.4.9",
+		"ts-jest": "^29.2.2",
+		"tsc-watch": "^6.2.0",
+		"tsconfig-collaborne": "^1.8.1",
+		"typescript": "^5.5.3"
+	},
+	"jest": {
+		"preset": "ts-jest",
+		"testEnvironment": "node",
+		"testMatch": [
+			"<rootDir>/src/**/*.spec.ts"
+		]
+	},
+	"types": "./lib/index.d.ts",
+	"directories": {
+		"lib": "lib"
+	},
+	"dependencies": {
+		"date-fns": "^3.6.0",
+		"search-query-parser": "^1.6.0"
+	}
+}
