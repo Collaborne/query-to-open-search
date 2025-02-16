@@ -33,7 +33,11 @@ function isValidDate(date: Date): boolean {
 	return date instanceof Date && !isNaN(date.getTime());
 }
 
-export function parseDateTerm(term?: string) {
+export function parseDateTerm(
+	term: string | undefined,
+	// Visible for testing
+	now = () => new Date(),
+) {
 	if (!term) {
 		return null;
 	}
@@ -42,19 +46,19 @@ export function parseDateTerm(term?: string) {
 	if (isValidDate(date)) {
 		return date;
 	}
-	const now = new Date();
+	const nowDate = now();
 
 	if (isNow(term)) {
-		return now;
+		return nowDate;
 	}
 
 	if (isDay(term)) {
 		const nbrOfDays = extractNumberFromTerm(term);
 		if (!isNaN(nbrOfDays)) {
 			if (isAdd(term)) {
-				return addDays(now, nbrOfDays);
+				return addDays(nowDate, nbrOfDays);
 			} else if (isSub(term)) {
-				return subDays(now, nbrOfDays);
+				return subDays(nowDate, nbrOfDays);
 			}
 		}
 	}
@@ -63,9 +67,9 @@ export function parseDateTerm(term?: string) {
 		const nbrOfWeeks = extractNumberFromTerm(term);
 		if (!isNaN(nbrOfWeeks)) {
 			if (isAdd(term)) {
-				return addWeeks(now, nbrOfWeeks);
+				return addWeeks(nowDate, nbrOfWeeks);
 			} else if (isSub(term)) {
-				return subWeeks(now, nbrOfWeeks);
+				return subWeeks(nowDate, nbrOfWeeks);
 			}
 		}
 	}
