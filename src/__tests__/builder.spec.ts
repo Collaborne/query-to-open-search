@@ -108,7 +108,8 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 			.query as OpenSearchVectorQuery;
 
 		expect(query.knn.embeddingField.vector).toEqual(embedding);
-		expect(query.knn.embeddingField.filter.bool.must).toEqual([
+		expect(query.knn.embeddingField.filter).toBeDefined();
+		expect(query.knn.embeddingField.filter!.bool.must).toEqual([
 			{
 				term: { tags: 'pain' },
 			},
@@ -213,5 +214,55 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 			.query as OpenSearchFilters;
 
 		expect(query.bool.must).toEqual([]);
+	});
+
+	test('uses radial vector search with maxDistance', async () => {
+		const embedding = [0.5, 0.5];
+		const translator = new QueryToOpenSearchBuilder({
+			...CONFIG,
+			vectorSearch: {
+				embeddingField: 'embeddingField',
+				toEmbedding: async () => embedding,
+				maxDistance: 0.75,
+			},
+		});
+
+		const queryString = `text tag:interview`;
+		const query = (await translator.build(queryString))
+			.query as OpenSearchVectorQuery;
+
+		expect(query.knn.embeddingField.vector).toEqual(embedding);
+		expect(query.knn.embeddingField.max_distance).toBe(0.75);
+		expect(query.knn.embeddingField.k).toBeUndefined();
+		expect(query.knn.embeddingField.min_score).toBeUndefined();
+		expect(query.knn.embeddingField.filter).toBeDefined();
+		expect(query.knn.embeddingField.filter!.bool.must).toContainEqual({
+			term: { tags: 'interview' },
+		});
+	});
+
+	test('uses radial vector search with minScore', async () => {
+		const embedding = [0.3, 0.9];
+		const translator = new QueryToOpenSearchBuilder({
+			...CONFIG,
+			vectorSearch: {
+				embeddingField: 'embeddingField',
+				toEmbedding: async () => embedding,
+				minScore: 0.6,
+			},
+		});
+
+		const queryString = `text tag:interview`;
+		const query = (await translator.build(queryString))
+			.query as OpenSearchVectorQuery;
+
+		expect(query.knn.embeddingField.vector).toEqual(embedding);
+		expect(query.knn.embeddingField.min_score).toBe(0.6);
+		expect(query.knn.embeddingField.k).toBeUndefined();
+		expect(query.knn.embeddingField.max_distance).toBeUndefined();
+		expect(query.knn.embeddingField.filter).toBeDefined();
+		expect(query.knn.embeddingField.filter!.bool.must).toContainEqual({
+			term: { tags: 'interview' },
+		});
 	});
 });

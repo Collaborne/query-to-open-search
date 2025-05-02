@@ -88,15 +88,16 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 
 		const { freeText, quoted } = getFreeText(queryString, parsedQuery);
 		if (freeText && freeText.length > 0) {
-			if (this.entityConfig.vectorSearch && !quoted) {
-				const inputEmbedding = await this.entityConfig.vectorSearch.toEmbedding(
-					freeText,
-				);
+			const vectorSearch = this.entityConfig.vectorSearch;
+			if (vectorSearch && !quoted) {
+				const inputEmbedding = await vectorSearch.toEmbedding(freeText);
 				query = {
 					knn: {
-						[this.entityConfig.vectorSearch.embeddingField]: {
+						[vectorSearch.embeddingField]: {
 							vector: inputEmbedding,
-							k: 100,
+							max_distance: vectorSearch.maxDistance,
+							min_score: vectorSearch.minScore,
+							k: vectorSearch.k,
 							filter: {
 								bool: query.bool,
 							},
