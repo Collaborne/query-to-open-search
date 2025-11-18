@@ -21,7 +21,16 @@ export interface KNNFieldQuery {
 	filter?: Record<string, any>;
 }
 
-export type OpenSearchQuery = OpenSearchFilters | OpenSearchVectorQuery;
+export interface OpenSearchHybridQuery {
+	hybrid: {
+		queries: Record<string, any>[];
+	};
+}
+
+export type OpenSearchQuery =
+	| OpenSearchFilters
+	| OpenSearchVectorQuery
+	| OpenSearchHybridQuery;
 
 export interface BuildResponse {
 	query: OpenSearchQuery;
@@ -44,6 +53,8 @@ export interface FieldConfig {
 	decodeValues?: (value: any) => any;
 }
 
+export type VectorSearchMode = 'knn' | 'hybrid';
+
 export interface EntityConfig {
 	fields: Record<string, FieldConfig>;
 	traditionalSearch: {
@@ -58,6 +69,7 @@ export interface EntityConfig {
 		maxDistance?: number;
 		// similarity search: include all points with score ≥ this threshold
 		minScore?: number;
+		mode?: VectorSearchMode;
 	};
 	// Filters that must be set in each query. This can be used e.g. to enforce a tenant filter
 	requiredFilters?: Record<string, string>;

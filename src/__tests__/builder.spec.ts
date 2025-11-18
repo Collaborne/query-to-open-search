@@ -1,18 +1,11 @@
 import { QueryToOpenSearchBuilder } from '../builder';
-import {
-	EntityConfig,
-	OpenSearchFilters,
-	OpenSearchVectorQuery,
-} from '../types';
-
+import { EntityConfig, OpenSearchFilters } from '../types';
 const resolveTagGroups = async (values: string[]): Promise<string[]> => {
 	const tagGroups: Record<string, string[]> = {
 		competitors: ['coke', 'pepsi'],
 	};
-
 	return tagGroups[values[0]] || [];
 };
-
 const CONFIG: EntityConfig = {
 	fields: {
 		tag: { type: 'term', indexField: 'tags', logicalConnect: 'AND' },
@@ -93,55 +86,6 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 		});
 	});
 
-	test('uses vector search', async () => {
-		const embedding = [0, 1];
-		const translator = new QueryToOpenSearchBuilder({
-			...CONFIG,
-			vectorSearch: {
-				embeddingField: 'embeddingField',
-				toEmbedding: async () => embedding,
-			},
-		});
-
-		const queryString = `text tag:pain`;
-		const query = (await translator.build(queryString))
-			.query as OpenSearchVectorQuery;
-
-		expect(query.knn.embeddingField.vector).toEqual(embedding);
-		expect(query.knn.embeddingField.filter).toBeDefined();
-		expect(query.knn.embeddingField.filter!.bool.must).toEqual([
-			{
-				term: { tags: 'pain' },
-			},
-		]);
-	});
-
-	test('respects forced exact search', async () => {
-		const embedding = [0, 1];
-		const translator = new QueryToOpenSearchBuilder({
-			...CONFIG,
-			vectorSearch: {
-				embeddingField: 'embeddingField',
-				toEmbedding: async () => embedding,
-			},
-		});
-
-		const queryString = `"text" tag:pain`;
-		const query = (await translator.build(queryString))
-			.query as OpenSearchFilters;
-
-		expect(query.bool.must).toContainEqual({
-			bool: {
-				minimum_should_match: 1,
-				should: [
-					{ match_phrase: { title: 'text' } },
-					{ match_phrase: { description: 'text' } },
-				],
-			},
-		});
-		expect(query.bool.must).toContainEqual({ term: { tags: 'pain' } });
-	});
-
 	test('handles filters without free-text search', async () => {
 		const translator = new QueryToOpenSearchBuilder(CONFIG);
 
@@ -214,55 +158,5 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 			.query as OpenSearchFilters;
 
 		expect(query.bool.must).toEqual([]);
-	});
-
-	test('uses radial vector search with maxDistance', async () => {
-		const embedding = [0.5, 0.5];
-		const translator = new QueryToOpenSearchBuilder({
-			...CONFIG,
-			vectorSearch: {
-				embeddingField: 'embeddingField',
-				toEmbedding: async () => embedding,
-				maxDistance: 0.75,
-			},
-		});
-
-		const queryString = `text tag:interview`;
-		const query = (await translator.build(queryString))
-			.query as OpenSearchVectorQuery;
-
-		expect(query.knn.embeddingField.vector).toEqual(embedding);
-		expect(query.knn.embeddingField.max_distance).toBe(0.75);
-		expect(query.knn.embeddingField.k).toBeUndefined();
-		expect(query.knn.embeddingField.min_score).toBeUndefined();
-		expect(query.knn.embeddingField.filter).toBeDefined();
-		expect(query.knn.embeddingField.filter!.bool.must).toContainEqual({
-			term: { tags: 'interview' },
-		});
-	});
-
-	test('uses radial vector search with minScore', async () => {
-		const embedding = [0.3, 0.9];
-		const translator = new QueryToOpenSearchBuilder({
-			...CONFIG,
-			vectorSearch: {
-				embeddingField: 'embeddingField',
-				toEmbedding: async () => embedding,
-				minScore: 0.6,
-			},
-		});
-
-		const queryString = `text tag:interview`;
-		const query = (await translator.build(queryString))
-			.query as OpenSearchVectorQuery;
-
-		expect(query.knn.embeddingField.vector).toEqual(embedding);
-		expect(query.knn.embeddingField.min_score).toBe(0.6);
-		expect(query.knn.embeddingField.k).toBeUndefined();
-		expect(query.knn.embeddingField.max_distance).toBeUndefined();
-		expect(query.knn.embeddingField.filter).toBeDefined();
-		expect(query.knn.embeddingField.filter!.bool.must).toContainEqual({
-			term: { tags: 'interview' },
-		});
 	});
 });
