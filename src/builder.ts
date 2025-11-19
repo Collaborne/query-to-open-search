@@ -87,38 +87,66 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 		}
 
 		const { freeText, quoted } = getFreeText(queryString, parsedQuery);
-		if (freeText && freeText.length > 0) {
-			const vectorSearch = this.entityConfig.vectorSearch;
-			if (vectorSearch && !quoted) {
-				const inputEmbedding = await vectorSearch.toEmbedding(freeText);
-				query = {
-					knn: {
-						[vectorSearch.embeddingField]: {
-							vector: inputEmbedding,
-							max_distance: vectorSearch.maxDistance,
-							min_score: vectorSearch.minScore,
-							k: vectorSearch.k,
-							filter: {
-								bool: query.bool,
-							},
+		const hasFreeText =
+			typeof freeText === 'string' && freeText.trim().length > 0;
+		const vectorSearch = this.entityConfig.vectorSearch;
+		const shouldUseVectorSearch =
+			Boolean(vectorSearch) && !quoted && hasFreeText;
+		const useHybridMode =
+			shouldUseVectorSearch && vectorSearch?.mode === 'hybrid';
+		let traditionalSearchQuery: Record<string, unknown> | undefined;
+
+		if (hasFreeText && freeText) {
+			const filters = this.entityConfig.traditionalSearch.fields.map(field => ({
+				// Exact matching
+				match_phrase: {
+					[field]: freeText,
+				},
+			}));
+			traditionalSearchQuery = {
+				bool: {
+					should: filters,
+					minimum_should_match: 1, // At least one of the match queries must return true
+				},
+			};
+
+			if (!shouldUseVectorSearch) {
+				query.bool.must.push(traditionalSearchQuery);
+			}
+		}
+
+		if (shouldUseVectorSearch && vectorSearch && freeText) {
+			const inputEmbedding = await vectorSearch.toEmbedding(freeText ?? '');
+			const vectorQuery = {
+				knn: {
+					[vectorSearch.embeddingField]: {
+						vector: inputEmbedding,
+						max_distance: vectorSearch.maxDistance,
+						min_score: vectorSearch.minScore,
+						k: vectorSearch.k,
+						filter: {
+							bool: query.bool,
 						},
+					},
+				},
+			};
+
+			if (useHybridMode && traditionalSearchQuery) {
+				query = {
+					hybrid: {
+						queries: [
+							vectorQuery,
+							{
+								bool: {
+									must: [...query.bool.must, traditionalSearchQuery],
+									must_not: [...query.bool.must_not],
+								},
+							},
+						],
 					},
 				};
 			} else {
-				const filters = this.entityConfig.traditionalSearch.fields.map(
-					field => ({
-						// Exact matching
-						match_phrase: {
-							[field]: freeText,
-						},
-					}),
-				);
-				query.bool.must.push({
-					bool: {
-						should: filters,
-						minimum_should_match: 1, // At least one of the match queries must return true
-					},
-				});
+				query = vectorQuery;
 			}
 		}
 		return {
