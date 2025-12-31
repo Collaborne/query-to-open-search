@@ -5,11 +5,37 @@ import { parseDateTerm } from '../parse-date-term';
 const NOW = new Date();
 
 describe('parseDateTerm', () => {
-	it('should return the date for "date string"', () => {
-		const result = parseDateTerm('1699834414144');
-		const date = new Date(1699834414144);
-		expect(result?.toDateString()).toBe(date.toDateString());
+	it('should return null for hyphenated ISO date string', () => {
+		const isoDate = '2023-10-01';
+		const result = parseDateTerm(isoDate);
+		expect(result).toBeNull();
 	});
+	it('should return the date for an ISO date string using underscores', () => {
+		const isoDate = '2023_10_01';
+		const result = parseDateTerm(isoDate);
+		expect(result?.toISOString()).toBe(new Date('2023-10-01').toISOString());
+	});
+
+	it('should return null for hyphenated ISO datetime string', () => {
+		const isoDatetime = '2023-10-01T12:30:45Z';
+		const result = parseDateTerm(isoDatetime);
+		expect(result).toBeNull();
+	});
+	it('should return the date for an ISO datetime string using underscores', () => {
+		const isoDatetime = '2023_10_01T12:30:45Z';
+		const result = parseDateTerm(isoDatetime);
+		expect(result?.toISOString()).toBe(
+			new Date('2023-10-01T12:30:45Z').toISOString(),
+		);
+	});
+
+	it('should return the date for epoch seconds', () => {
+		const epochSeconds = '1699834414';
+		const result = parseDateTerm(epochSeconds);
+		const date = new Date(parseInt(epochSeconds, 10) * 1000);
+		expect(result?.toISOString()).toBe(date.toISOString());
+	});
+
 	it('should return the current date for "now"', () => {
 		const result = parseDateTerm('now', () => NOW);
 		expect(result?.toDateString()).toBe(NOW.toDateString());

@@ -1,5 +1,13 @@
 import { addWeeks, subWeeks, addDays, subDays } from 'date-fns';
 
+const ISO_DATE_ONLY_REGEX = /^\d{4}_\d{2}_\d{2}$/;
+const ISO_DATETIME_REGEX =
+	/^\d{4}_\d{2}_\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$/;
+
+function normalizeIsoSeparators(term: string) {
+	return term.includes('_') ? term.replace(/_/g, '-') : term;
+}
+
 function isWeek(term: string) {
 	return term.endsWith('w');
 }
@@ -33,6 +41,27 @@ function isValidDate(date: Date): boolean {
 	return date instanceof Date && !isNaN(date.getTime());
 }
 
+function parseIsoDate(term: string) {
+	if (!ISO_DATE_ONLY_REGEX.test(term) && !ISO_DATETIME_REGEX.test(term)) {
+		return null;
+	}
+
+	const normalizedTerm = normalizeIsoSeparators(term);
+	const date = new Date(normalizedTerm);
+	return isValidDate(date) ? date : null;
+}
+
+function parseEpoch(term: string) {
+	if (!/^-?\d+$/.test(term)) {
+		return null;
+	}
+
+	const epoch = parseInt(term, 10);
+	const milliseconds = term.length <= 10 ? epoch * 1000 : epoch;
+	const date = new Date(milliseconds);
+	return isValidDate(date) ? date : null;
+}
+
 export function parseDateTerm(
 	term: string | undefined,
 	// Visible for testing
@@ -41,11 +70,19 @@ export function parseDateTerm(
 	if (!term) {
 		return null;
 	}
-	// return the date if the term is a date representation (MM/DD/YYYY)
-	const date = new Date(parseInt(term));
-	if (isValidDate(date)) {
-		return date;
+
+	// Return the date if the term is an ISO date (date or datetime).
+	const isoDate = parseIsoDate(term);
+	if (isoDate) {
+		return isoDate;
 	}
+
+	// Return the date if the term is an epoch representation (seconds or milliseconds).
+	const epochDate = parseEpoch(term);
+	if (epochDate) {
+		return epochDate;
+	}
+
 	const nowDate = now();
 
 	if (isNow(term)) {

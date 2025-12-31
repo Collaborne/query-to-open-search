@@ -86,6 +86,24 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 		});
 	});
 
+	test('handles range filters using underscore-separated dates', async () => {
+		const translator = new QueryToOpenSearchBuilder(CONFIG);
+
+		const queryString =
+			'date:2023_09_06T00:00:00.000Z-2023_10_15T00:00:00.000Z';
+		const query = (await translator.build(queryString))
+			.query as OpenSearchFilters;
+
+		expect(query.bool.must).toContainEqual({
+			range: {
+				createdAt: {
+					gte: '2023-09-06T00:00:00.000Z',
+					lte: '2023-10-15T00:00:00.000Z',
+				},
+			},
+		});
+	});
+
 	test('handles filters without free-text search', async () => {
 		const translator = new QueryToOpenSearchBuilder(CONFIG);
 
