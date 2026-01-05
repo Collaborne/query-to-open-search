@@ -94,21 +94,44 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 			Boolean(vectorSearch) && !quoted && hasFreeText;
 		const useHybridMode =
 			shouldUseVectorSearch && vectorSearch?.mode === 'hybrid';
+		const prefixSearch = this.entityConfig.prefixSearch;
+
 		let traditionalSearchQuery: Record<string, unknown> | undefined;
 
 		if (hasFreeText && freeText) {
-			const filters = this.entityConfig.traditionalSearch.fields.map(field => ({
-				// Exact matching
-				match_phrase: {
-					[field]: freeText,
-				},
-			}));
-			traditionalSearchQuery = {
-				bool: {
-					should: filters,
-					minimum_should_match: 1, // At least one of the match queries must return true
-				},
-			};
+			const canUsePrefixSearch =
+				Boolean(prefixSearch) &&
+				freeText.length >= (prefixSearch?.minChars ?? 1);
+
+			if (canUsePrefixSearch && prefixSearch) {
+				const normalizedFreeText = freeText.toLowerCase();
+				const filters = prefixSearch.fields.map(field => ({
+					prefix: {
+						[field]: normalizedFreeText,
+					},
+				}));
+				traditionalSearchQuery = {
+					bool: {
+						should: filters,
+						minimum_should_match: 1,
+					},
+				};
+			} else {
+				const filters = this.entityConfig.traditionalSearch.fields.map(
+					field => ({
+						// Exact matching
+						match_phrase: {
+							[field]: freeText,
+						},
+					}),
+				);
+				traditionalSearchQuery = {
+					bool: {
+						should: filters,
+						minimum_should_match: 1, // At least one of the match queries must return true
+					},
+				};
+			}
 
 			if (!shouldUseVectorSearch) {
 				query.bool.must.push(traditionalSearchQuery);

@@ -132,6 +132,50 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 		});
 	});
 
+	test('uses prefix search when configured and minChars is satisfied', async () => {
+		const translator = new QueryToOpenSearchBuilder({
+			...CONFIG,
+			prefixSearch: {
+				fields: ['title.sort'],
+			},
+		});
+
+		const queryString = `Text`;
+		const query = (await translator.build(queryString))
+			.query as OpenSearchFilters;
+
+		expect(query.bool.must).toContainEqual({
+			bool: {
+				minimum_should_match: 1,
+				should: [{ prefix: { 'title.sort': 'text' } }],
+			},
+		});
+	});
+
+	test('falls back to match_phrase when prefix search is below minChars threshold', async () => {
+		const translator = new QueryToOpenSearchBuilder({
+			...CONFIG,
+			prefixSearch: {
+				fields: ['title.sort'],
+				minChars: 3,
+			},
+		});
+
+		const queryString = `hi`;
+		const query = (await translator.build(queryString))
+			.query as OpenSearchFilters;
+
+		expect(query.bool.must).toContainEqual({
+			bool: {
+				minimum_should_match: 1,
+				should: [
+					{ match_phrase: { title: 'hi' } },
+					{ match_phrase: { description: 'hi' } },
+				],
+			},
+		});
+	});
+
 	test('adds required filters', async () => {
 		const translator = new QueryToOpenSearchBuilder({
 			...CONFIG,

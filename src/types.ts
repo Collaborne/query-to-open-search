@@ -55,11 +55,17 @@ export interface FieldConfig {
 
 export type VectorSearchMode = 'knn' | 'hybrid';
 
+export interface PrefixSearchConfig {
+	fields: string[];
+	minChars?: number;
+}
+
 export interface EntityConfig {
 	fields: Record<string, FieldConfig>;
 	traditionalSearch: {
 		fields: string[];
 	};
+	prefixSearch?: PrefixSearchConfig;
 	vectorSearch?: {
 		embeddingField: string;
 		toEmbedding: (text: string) => Promise<number[]>;
