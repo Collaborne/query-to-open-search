@@ -40,6 +40,11 @@ export interface QueryBuilder {
 	build(queryString: string): Promise<BuildResponse>;
 }
 
+export interface QueryBuilderOptions {
+	now?: () => Date;
+	timeZone?: string;
+}
+
 export type FieldType = 'term' | 'range' | 'text';
 export type LogicalConnect = 'AND' | 'OR';
 

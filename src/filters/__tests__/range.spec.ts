@@ -27,4 +27,34 @@ describe('RangeFilter', () => {
 			},
 		]);
 	});
+
+	test('resolves semantic calendar date filters', async () => {
+		const fieldConfig: FieldConfig = {
+			type: 'range',
+			indexField: 'recordedAt',
+		};
+
+		const actual = await new RangeFilter().create(
+			fieldConfig,
+			{
+				from: 'cal.d.prev@00:00',
+				to: 'cal.d.now@00:00',
+			},
+			{
+				now: () => new Date('2026-05-07T10:00:00.000Z'),
+				timeZone: 'Europe/Amsterdam',
+			},
+		);
+
+		expect(actual).toEqual([
+			{
+				range: {
+					recordedAt: {
+						gte: '2026-05-05T22:00:00.000Z',
+						lte: '2026-05-06T21:59:59.999Z',
+					},
+				},
+			},
+		]);
+	});
 });

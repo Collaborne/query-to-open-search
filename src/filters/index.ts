@@ -1,4 +1,9 @@
-import { FieldConfig, FieldType, LogicalConnect } from '../types';
+import {
+	FieldConfig,
+	FieldType,
+	LogicalConnect,
+	QueryBuilderOptions,
+} from '../types';
 
 import { RangeFilter } from './range';
 import { TermFilter } from './term';
@@ -18,10 +23,14 @@ export class Filters implements Filter {
 		};
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	async create(fieldConfig: FieldConfig, values: any) {
+	async create(
+		fieldConfig: FieldConfig,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		values: any,
+		options?: QueryBuilderOptions,
+	) {
 		const handler = this.filterHandlers[fieldConfig.type];
-		const filters = await handler.create(fieldConfig, values);
+		const filters = await handler.create(fieldConfig, values, options);
 
 		const logicalConnect =
 			fieldConfig.logicalConnect ?? DEFAULT_LOGICAL_CONNECT;
