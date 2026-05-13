@@ -86,6 +86,26 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 		});
 	});
 
+	test('handles semantic calendar date filters', async () => {
+		const translator = new QueryToOpenSearchBuilder(CONFIG, {
+			now: () => new Date('2026-05-07T10:00:00.000Z'),
+			timeZone: 'Europe/Amsterdam',
+		});
+
+		const query = (
+			await translator.build('date:cal.d.prev@00:00-cal.d.now@00:00')
+		).query as OpenSearchFilters;
+
+		expect(query.bool.must).toContainEqual({
+			range: {
+				createdAt: {
+					gte: '2026-05-05T22:00:00.000Z',
+					lte: '2026-05-06T21:59:59.999Z',
+				},
+			},
+		});
+	});
+
 	test('handles range filters using underscore-separated dates', async () => {
 		const translator = new QueryToOpenSearchBuilder(CONFIG);
 

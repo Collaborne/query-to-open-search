@@ -10,6 +10,7 @@ import {
 	BuildResponse,
 	EntityConfig,
 	OpenSearchQuery,
+	QueryBuilderOptions,
 	QueryBuilder,
 } from './types';
 
@@ -54,9 +55,11 @@ function getFreeText(
 export class QueryToOpenSearchBuilder implements QueryBuilder {
 	private entityConfig: EntityConfig;
 	private filterHandler = new Filters();
+	private options: QueryBuilderOptions;
 
-	constructor(entityConfig: EntityConfig) {
+	constructor(entityConfig: EntityConfig, options: QueryBuilderOptions = {}) {
 		this.entityConfig = entityConfig;
+		this.options = options;
 	}
 
 	async build(queryString: string): Promise<BuildResponse> {
@@ -195,6 +198,7 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 				const fieldFilters = await this.filterHandler.create(
 					fieldConfig,
 					decodedValues,
+					this.options,
 				);
 				filters.push(...fieldFilters);
 			}

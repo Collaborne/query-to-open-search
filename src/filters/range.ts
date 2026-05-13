@@ -1,10 +1,44 @@
+import { resolveCalendarDateRange } from '../libs/calendar-date-range';
 import { parseDateTerm } from '../libs/parse-date-term';
-import { FieldConfig } from '../types';
+import { FieldConfig, QueryBuilderOptions } from '../types';
 
 import { Filter } from './types';
 
-export class RangeFilter implements Filter<{ from: string; to: string }> {
-	async create(fieldConfig: FieldConfig, value: { from: string; to: string }) {
+type RangeValue = { from: string; to: string };
+
+function createRangeQuery(indexField: string, from: Date, to: Date) {
+	return {
+		range: {
+			[indexField]: {
+				gte: from.toISOString(),
+				lte: to.toISOString(),
+			},
+		},
+	};
+}
+
+export class RangeFilter implements Filter<RangeValue> {
+	async create(
+		fieldConfig: FieldConfig,
+		value: RangeValue,
+		options?: QueryBuilderOptions,
+	) {
+		const calendarRange = resolveCalendarDateRange({
+			from: value.from,
+			to: value.to,
+			now: options?.now?.() ?? new Date(),
+			timeZone: options?.timeZone,
+		});
+		if (calendarRange) {
+			return [
+				createRangeQuery(
+					fieldConfig.indexField,
+					calendarRange.from,
+					calendarRange.to,
+				),
+			];
+		}
+
 		const from = parseDateTerm(value.from);
 		const to = parseDateTerm(value.to);
 
@@ -12,15 +46,6 @@ export class RangeFilter implements Filter<{ from: string; to: string }> {
 			return [];
 		}
 
-		const rangeQuery = {
-			range: {
-				[fieldConfig.indexField]: {
-					gte: from.toISOString(),
-					lte: to.toISOString(),
-				},
-			},
-		};
-
-		return [rangeQuery];
+		return [createRangeQuery(fieldConfig.indexField, from, to)];
 	}
 }
