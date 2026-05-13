@@ -22,18 +22,16 @@ interface CalendarDateRangeParams {
 }
 
 type CalendarPeriod = 'd' | 'w' | 'm';
-type CalendarWeekday = 'mon' | 'sun';
 
 interface CalendarEndpoint {
 	period: CalendarPeriod;
 	periodOffset: number;
-	weekday?: CalendarWeekday;
 	hour: number;
 	minute: number;
 }
 
 const ENDPOINT_REGEX =
-	/^cal\.(d|w|m)\.(now|prev(?:_\d+)?)(?:\.(mon|sun))?(?:@([01]\d|2[0-3]):([0-5]\d))?$/;
+	/^cal\.(d|w|m)\.(now|prev(?:_\d+)?)(?:@([01]\d|2[0-3]):([0-5]\d))?$/;
 
 function getTimeZone(timeZone?: string) {
 	try {
@@ -162,11 +160,7 @@ function getPeriodStart(
 		return addLocalMonths(currentMonth, endpoint.periodOffset);
 	}
 
-	const weekStartsOn = endpoint.weekday === 'sun' ? 0 : 1;
-	const currentWeekStart = addLocalDays(
-		today,
-		-getWeekStartOffset(today, weekStartsOn),
-	);
+	const currentWeekStart = addLocalDays(today, -getWeekStartOffset(today, 1));
 	return addLocalDays(currentWeekStart, endpoint.periodOffset * 7);
 }
 
@@ -198,18 +192,11 @@ function parseCalendarEndpoint(value?: string): CalendarEndpoint | undefined {
 		return undefined;
 	}
 
-	const [, period, anchor, weekday, hour, minute] = match;
-	if (period !== 'w' && weekday) {
-		return undefined;
-	}
-	if (period === 'w' && !weekday) {
-		return undefined;
-	}
+	const [, period, anchor, hour, minute] = match;
 
 	return {
 		period: period as CalendarPeriod,
 		periodOffset: getPeriodOffset(anchor),
-		weekday: weekday as CalendarWeekday | undefined,
 		hour: Number(hour ?? 0),
 		minute: Number(minute ?? 0),
 	};
