@@ -213,6 +213,60 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 		expect(query.bool.must).toContainEqual({ term: { user: 'my-user' } });
 	});
 
+	test('adds default filters when field is missing', async () => {
+		const defaultOriginFilter = {
+			bool: {
+				must_not: [{ exists: { field: 'origin' } }],
+			},
+		};
+		const translator = new QueryToOpenSearchBuilder({
+			...CONFIG,
+			fields: {
+				...CONFIG.fields,
+				origin: { type: 'term', indexField: 'origin' },
+			},
+			defaultFilters: [
+				{
+					unlessFieldPresent: 'origin',
+					filter: defaultOriginFilter,
+				},
+			],
+		});
+
+		const query = (await translator.build(`text`)).query as OpenSearchFilters;
+
+		expect(query.bool.must).toContainEqual(defaultOriginFilter);
+	});
+
+	test('skips default filters when field is present', async () => {
+		const defaultOriginFilter = {
+			bool: {
+				must_not: [{ exists: { field: 'origin' } }],
+			},
+		};
+		const translator = new QueryToOpenSearchBuilder({
+			...CONFIG,
+			fields: {
+				...CONFIG.fields,
+				origin: { type: 'term', indexField: 'origin' },
+			},
+			defaultFilters: [
+				{
+					unlessFieldPresent: 'origin',
+					filter: defaultOriginFilter,
+				},
+			],
+		});
+
+		const query = (await translator.build(`text origin:automation`))
+			.query as OpenSearchFilters;
+
+		expect(query.bool.must).toContainEqual({
+			term: { origin: 'automation' },
+		});
+		expect(query.bool.must).not.toContainEqual(defaultOriginFilter);
+	});
+
 	test('decodes values for filters', async () => {
 		const translator = new QueryToOpenSearchBuilder({
 			fields: {

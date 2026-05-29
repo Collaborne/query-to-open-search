@@ -65,6 +65,11 @@ export interface PrefixSearchConfig {
 	minChars?: number;
 }
 
+export interface DefaultFilterConfig {
+	unlessFieldPresent: string;
+	filter: Record<string, any>;
+}
+
 export interface EntityConfig {
 	fields: Record<string, FieldConfig>;
 	traditionalSearch: {
@@ -84,6 +89,8 @@ export interface EntityConfig {
 	};
 	// Filters that must be set in each query. This can be used e.g. to enforce a tenant filter
 	requiredFilters?: Record<string, string>;
+	// Filters that are added unless the user explicitly filters on the configured field.
+	defaultFilters?: DefaultFilterConfig[];
 }
 
 export function isVectorQuery(

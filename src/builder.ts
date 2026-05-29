@@ -52,6 +52,16 @@ function getFreeText(
 	return { freeText, quoted: false };
 }
 
+function hasFieldFilter(
+	parsedQuery: string | SearchParserResult,
+	field: string,
+): boolean {
+	return (
+		typeof parsedQuery !== 'string' &&
+		(field in parsedQuery || field in (parsedQuery.exclude ?? {}))
+	);
+}
+
 export class QueryToOpenSearchBuilder implements QueryBuilder {
 	private entityConfig: EntityConfig;
 	private filterHandler = new Filters();
@@ -72,10 +82,15 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 				[filter]: value,
 			},
 		}));
+		const defaultFilters = (this.entityConfig.defaultFilters ?? [])
+			.filter(({ unlessFieldPresent }) => {
+				return !hasFieldFilter(parsedQuery, unlessFieldPresent);
+			})
+			.map(({ filter }) => filter);
 
 		let query: OpenSearchQuery = {
 			bool: {
-				must: requiredFilters,
+				must: [...requiredFilters, ...defaultFilters],
 				must_not: [],
 			},
 		};

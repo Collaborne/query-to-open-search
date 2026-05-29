@@ -41,6 +41,40 @@ describe('QueryToOpenSearchBuilder vector search', () => {
 		]);
 	});
 
+	test('adds default filters to vector search filters', async () => {
+		const embedding = [0, 1];
+		const defaultOriginFilter = {
+			bool: {
+				must_not: [{ exists: { field: 'origin' } }],
+			},
+		};
+		const translator = new QueryToOpenSearchBuilder({
+			...CONFIG,
+			fields: {
+				...CONFIG.fields,
+				origin: { type: 'term', indexField: 'origin' },
+			},
+			defaultFilters: [
+				{
+					unlessFieldPresent: 'origin',
+					filter: defaultOriginFilter,
+				},
+			],
+			vectorSearch: {
+				embeddingField: 'embeddingField',
+				toEmbedding: async () => embedding,
+			},
+		});
+
+		const query = (await translator.build(`text`))
+			.query as OpenSearchVectorQuery;
+
+		expect(query.knn.embeddingField.filter).toBeDefined();
+		expect(query.knn.embeddingField.filter!.bool.must).toContainEqual(
+			defaultOriginFilter,
+		);
+	});
+
 	test('respects forced exact search', async () => {
 		const embedding = [0, 1];
 		const translator = new QueryToOpenSearchBuilder({
