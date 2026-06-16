@@ -21,7 +21,7 @@ interface CalendarDateRangeParams {
 	timeZone?: string;
 }
 
-type CalendarPeriod = 'd' | 'w' | 'm';
+type CalendarPeriod = 'd' | 'w' | 'm' | 'q';
 
 interface CalendarEndpoint {
 	period: CalendarPeriod;
@@ -31,7 +31,7 @@ interface CalendarEndpoint {
 }
 
 const ENDPOINT_REGEX =
-	/^cal\.(d|w|m)\.(now|prev(?:_\d+)?)(?:@([01]\d|2[0-3]):([0-5]\d))?$/;
+	/^cal\.(d|w|m|q)\.(now|prev(?:_\d+)?)(?:@([01]\d|2[0-3]):([0-5]\d))?$/;
 
 function getTimeZone(timeZone?: string) {
 	try {
@@ -136,6 +136,10 @@ function addLocalMonths(
 	};
 }
 
+function getQuarterStartMonth(month: number) {
+	return Math.floor((month - 1) / 3) * 3 + 1;
+}
+
 function getPeriodOffset(anchor: string) {
 	if (anchor === 'now') {
 		return 0;
@@ -158,6 +162,14 @@ function getPeriodStart(
 	if (endpoint.period === 'm') {
 		const currentMonth = { year: today.year, month: today.month, day: 1 };
 		return addLocalMonths(currentMonth, endpoint.periodOffset);
+	}
+	if (endpoint.period === 'q') {
+		const currentQuarter = {
+			year: today.year,
+			month: getQuarterStartMonth(today.month),
+			day: 1,
+		};
+		return addLocalMonths(currentQuarter, endpoint.periodOffset * 3);
 	}
 
 	const currentWeekStart = addLocalDays(today, -getWeekStartOffset(today, 1));
