@@ -227,7 +227,7 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 			},
 			defaultFilters: [
 				{
-					unlessFieldPresent: 'origin',
+					unlessFieldPresent: ['origin', 'memory'],
 					filter: defaultOriginFilter,
 				},
 			],
@@ -238,7 +238,7 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 		expect(query.bool.must).toContainEqual(defaultOriginFilter);
 	});
 
-	test('skips default filters when field is present', async () => {
+	test('skips default filters when any configured field is present', async () => {
 		const defaultOriginFilter = {
 			bool: {
 				must_not: [{ exists: { field: 'origin' } }],
@@ -249,22 +249,21 @@ describe('SearchQueryToOpenSearchFilterTranslator', () => {
 			fields: {
 				...CONFIG.fields,
 				origin: { type: 'term', indexField: 'origin' },
+				memory: { type: 'term', indexField: 'memory' },
 			},
 			defaultFilters: [
 				{
-					unlessFieldPresent: 'origin',
+					unlessFieldPresent: ['origin', 'memory'],
 					filter: defaultOriginFilter,
 				},
 			],
 		});
 
-		const query = (await translator.build(`text origin:automation`))
-			.query as OpenSearchFilters;
-
-		expect(query.bool.must).toContainEqual({
-			term: { origin: 'automation' },
-		});
-		expect(query.bool.must).not.toContainEqual(defaultOriginFilter);
+		for (const field of ['origin', 'memory']) {
+			const query = (await translator.build(`text ${field}:automation`))
+				.query as OpenSearchFilters;
+			expect(query.bool.must).not.toContainEqual(defaultOriginFilter);
+		}
 	});
 
 	test('decodes values for filters', async () => {

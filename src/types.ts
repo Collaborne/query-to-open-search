@@ -66,7 +66,7 @@ export interface PrefixSearchConfig {
 }
 
 export interface DefaultFilterConfig {
-	unlessFieldPresent: string;
+	unlessFieldPresent: string[];
 	filter: Record<string, any>;
 }
 

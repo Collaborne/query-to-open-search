@@ -84,7 +84,9 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 		}));
 		const defaultFilters = (this.entityConfig.defaultFilters ?? [])
 			.filter(({ unlessFieldPresent }) => {
-				return !hasFieldFilter(parsedQuery, unlessFieldPresent);
+				return !unlessFieldPresent.some(field =>
+					hasFieldFilter(parsedQuery, field),
+				);
 			})
 			.map(({ filter }) => filter);
 

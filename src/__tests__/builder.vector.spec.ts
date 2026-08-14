@@ -56,7 +56,7 @@ describe('QueryToOpenSearchBuilder vector search', () => {
 			},
 			defaultFilters: [
 				{
-					unlessFieldPresent: 'origin',
+					unlessFieldPresent: ['origin'],
 					filter: defaultOriginFilter,
 				},
 			],
