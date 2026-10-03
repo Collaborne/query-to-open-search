@@ -1,8 +1,9 @@
 {
-	"extends": "tsconfig-collaborne",
+	"extends": "tsconfig-collaborne/tsconfig.json",
 	"compilerOptions": {
 		"declaration": true,
 		"noEmit": false,
+		"rootDir": "./src",
 		"types": ["node", "jest"],
 		"outDir": "./lib",
 		"skipLibCheck": true

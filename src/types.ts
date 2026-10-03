@@ -5,7 +5,6 @@ import { SearchParserResult } from 'search-query-parser';
 export interface OpenSearchFilters {
 	bool: {
 		must: Record<string, any>[];
-		// eslint-disable-next-line @typescript-eslint/naming-convention
 		must_not: Record<string, any>[];
 	};
 }
@@ -28,9 +27,7 @@ export interface OpenSearchHybridQuery {
 }
 
 export type OpenSearchQuery =
-	| OpenSearchFilters
-	| OpenSearchVectorQuery
-	| OpenSearchHybridQuery;
+	OpenSearchFilters | OpenSearchVectorQuery | OpenSearchHybridQuery;
 
 export interface BuildResponse {
 	query: OpenSearchQuery;
