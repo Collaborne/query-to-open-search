@@ -72,4 +72,28 @@ describe('resolveCalendarDateRange', () => {
 		expect(range?.from.toISOString()).toBe('2026-03-31T22:00:00.000Z');
 		expect(range?.to.toISOString()).toBe('2026-06-30T21:59:59.999Z');
 	});
+
+	it('resolves last year', () => {
+		const range = resolveCalendarDateRange({
+			from: 'cal.y.prev@00:00',
+			to: 'cal.y.now@00:00',
+			now: new Date('2026-05-07T10:00:00.000Z'),
+			timeZone: 'Europe/Amsterdam',
+		});
+
+		expect(range?.from.toISOString()).toBe('2024-12-31T23:00:00.000Z');
+		expect(range?.to.toISOString()).toBe('2025-12-31T22:59:59.999Z');
+	});
+
+	it('supports explicit previous year offsets', () => {
+		const range = resolveCalendarDateRange({
+			from: 'cal.y.prev_2@00:00',
+			to: 'cal.y.prev_1@00:00',
+			now: new Date('2026-11-07T10:00:00.000Z'),
+			timeZone: 'Europe/Amsterdam',
+		});
+
+		expect(range?.from.toISOString()).toBe('2023-12-31T23:00:00.000Z');
+		expect(range?.to.toISOString()).toBe('2024-12-31T22:59:59.999Z');
+	});
 });

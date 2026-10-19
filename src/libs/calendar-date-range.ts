@@ -21,7 +21,7 @@ interface CalendarDateRangeParams {
 	timeZone?: string;
 }
 
-type CalendarPeriod = 'd' | 'w' | 'm' | 'q';
+type CalendarPeriod = 'd' | 'w' | 'm' | 'q' | 'y';
 
 interface CalendarEndpoint {
 	period: CalendarPeriod;
@@ -31,7 +31,7 @@ interface CalendarEndpoint {
 }
 
 const ENDPOINT_REGEX =
-	/^cal\.(d|w|m|q)\.(now|prev(?:_\d+)?)(?:@([01]\d|2[0-3]):([0-5]\d))?$/;
+	/^cal\.(d|w|m|q|y)\.(now|prev(?:_\d+)?)(?:@([01]\d|2[0-3]):([0-5]\d))?$/;
 
 function getTimeZone(timeZone?: string) {
 	try {
@@ -170,6 +170,10 @@ function getPeriodStart(
 			day: 1,
 		};
 		return addLocalMonths(currentQuarter, endpoint.periodOffset * 3);
+	}
+	if (endpoint.period === 'y') {
+		const currentYear = { year: today.year, month: 1, day: 1 };
+		return addLocalMonths(currentYear, endpoint.periodOffset * 12);
 	}
 
 	const currentWeekStart = addLocalDays(today, -getWeekStartOffset(today, 1));
