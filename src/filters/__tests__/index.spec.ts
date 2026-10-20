@@ -1,5 +1,5 @@
-import { Filters } from '..';
-import { FieldConfig } from '../../types';
+import type { FieldConfig } from '../../types.js';
+import { Filters } from '../index.js';
 
 const resolveTagGroups = async (values: string[]): Promise<string[]> => {
 	const tagGroups: Record<string, string[]> = {

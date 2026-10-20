@@ -2,14 +2,22 @@
 	"name": "query-to-open-search",
 	"version": "0.4.1",
 	"description": "Translates query strings into OpenSearch queries",
-	"main": "lib/index.js",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./lib/index.d.ts",
+			"import": "./lib/index.js"
+		}
+	},
 	"source": "src/index.ts",
 	"scripts": {
-		"build": "tsc",
+		"clean": "rm -rf lib lib-test",
+		"build": "npm run clean && tsc",
 		"lint": "eslint 'src/**/*.ts'",
 		"lint:fix": "eslint --fix 'src/**/*.ts'",
 		"build:watch": "tsc-watch --noEmit false --onSuccess \"yalc push --watch\"",
-		"test": "npm run lint && tsc --project tsconfig.test.json && jest",
+		"typecheck:test": "tsc --project tsconfig.test.json",
+		"test": "npm run lint && npm run typecheck:test && NODE_OPTIONS=--experimental-vm-modules jest --watchman=false",
 		"prepack": "cp package-lock.json npm-shrinkwrap.json",
 		"postpack": "rm -f npm-shrinkwrap.json",
 		"preversion": "echo ${npm_package_version} > .preversion.txt; zip -q .preversion-backup.zip package.json package-lock.json",
@@ -51,13 +59,31 @@
 		"typescript": "^6.0.3"
 	},
 	"jest": {
-		"preset": "ts-jest",
+		"preset": "ts-jest/presets/default-esm",
 		"testEnvironment": "node",
+		"extensionsToTreatAsEsm": [
+			".ts"
+		],
+		"moduleNameMapper": {
+			"^(\\.{1,2}/.*)\\.js$": "$1"
+		},
+		"transform": {
+			"^.+\\.tsx?$": [
+				"ts-jest",
+				{
+					"tsconfig": "tsconfig.test.json",
+					"useESM": true
+				}
+			]
+		},
 		"testMatch": [
 			"<rootDir>/src/**/*.spec.ts"
 		]
 	},
 	"types": "./lib/index.d.ts",
+	"engines": {
+		"node": ">=24"
+	},
 	"directories": {
 		"lib": "lib"
 	},

@@ -1,7 +1,10 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
-		"outDir": "./lib-test",
+		"declaration": false,
+		"isolatedModules": true,
+		"noEmit": true,
+		"types": ["node", "jest"]
 	},
 	"include": ["src"],
 	"exclude": ["node_modules", "lib", "lib-test"]

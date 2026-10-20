@@ -1,6 +1,6 @@
-import { FieldConfig } from '../types';
+import type { FieldConfig } from '../types.js';
 
-import { Filter } from './types';
+import type { Filter } from './types.js';
 
 export class TextFilter implements Filter<string[]> {
 	async create(fieldConfig: FieldConfig, values: string[]) {

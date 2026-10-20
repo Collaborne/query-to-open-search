@@ -1,5 +1,5 @@
-import { FieldConfig } from '../../types';
-import { TermFilter } from '../term';
+import type { FieldConfig } from '../../types.js';
+import { TermFilter } from '../term.js';
 
 const resolveTagGroups = async (values: string[]): Promise<string[]> => {
 	const tagGroups: Record<string, string[]> = {

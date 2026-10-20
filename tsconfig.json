@@ -2,12 +2,24 @@
 	"extends": "tsconfig-collaborne/tsconfig.json",
 	"compilerOptions": {
 		"declaration": true,
+		"incremental": false,
+		"lib": ["ES2024"],
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"noEmit": false,
 		"rootDir": "./src",
-		"types": ["node", "jest"],
+		"types": ["node"],
 		"outDir": "./lib",
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"target": "ES2024",
+		"verbatimModuleSyntax": true
 	},
 	"include": ["src"],
-	"exclude": ["node_modules", "lib", "lib-test", "src/*/__tests__/*"]
+	"exclude": [
+		"node_modules",
+		"lib",
+		"lib-test",
+		"src/**/*.spec.ts",
+		"src/**/__tests__/**"
+	]
 }

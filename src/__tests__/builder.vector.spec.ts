@@ -1,10 +1,12 @@
-import { QueryToOpenSearchBuilder } from '../builder';
-import {
+import { jest } from '@jest/globals';
+
+import { QueryToOpenSearchBuilder } from '../builder.js';
+import type {
 	EntityConfig,
 	OpenSearchFilters,
 	OpenSearchHybridQuery,
 	OpenSearchVectorQuery,
-} from '../types';
+} from '../types.js';
 
 const CONFIG: EntityConfig = {
 	fields: {
@@ -102,7 +104,9 @@ describe('QueryToOpenSearchBuilder vector search', () => {
 	});
 
 	test('skips vector search for empty queries', async () => {
-		const toEmbedding = jest.fn().mockResolvedValue([0.1, 0.2]);
+		const toEmbedding = jest
+			.fn<() => Promise<number[]>>()
+			.mockResolvedValue([0.1, 0.2]);
 		const translator = new QueryToOpenSearchBuilder({
 			...CONFIG,
 			vectorSearch: {

@@ -1,5 +1,5 @@
-import { FieldConfig } from '../../types';
-import { TextFilter } from '../text';
+import type { FieldConfig } from '../../types.js';
+import { TextFilter } from '../text.js';
 
 describe('TextFilter', () => {
 	test('adds text filters', async () => {

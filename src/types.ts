@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { SearchParserResult } from 'search-query-parser';
+import type { SearchParserResult } from 'search-query-parser';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface OpenSearchFilters {

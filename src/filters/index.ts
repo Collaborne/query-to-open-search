@@ -1,14 +1,14 @@
-import {
+import type {
 	FieldConfig,
 	FieldType,
 	LogicalConnect,
 	QueryBuilderOptions,
-} from '../types';
+} from '../types.js';
 
-import { RangeFilter } from './range';
-import { TermFilter } from './term';
-import { TextFilter } from './text';
-import { Filter } from './types';
+import { RangeFilter } from './range.js';
+import { TermFilter } from './term.js';
+import { TextFilter } from './text.js';
+import type { Filter } from './types.js';
 
 const DEFAULT_LOGICAL_CONNECT: LogicalConnect = 'OR';
 

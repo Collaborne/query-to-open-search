@@ -1,4 +1,4 @@
-import { resolveCalendarDateRange } from './calendar-date-range';
+import { resolveCalendarDateRange } from './calendar-date-range.js';
 
 describe('resolveCalendarDateRange', () => {
 	it('resolves last yesterday in an IANA timezone', () => {

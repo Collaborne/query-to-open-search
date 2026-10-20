@@ -1,8 +1,8 @@
-import { resolveCalendarDateRange } from '../libs/calendar-date-range';
-import { parseDateTerm } from '../libs/parse-date-term';
-import { FieldConfig, QueryBuilderOptions } from '../types';
+import { resolveCalendarDateRange } from '../libs/calendar-date-range.js';
+import { parseDateTerm } from '../libs/parse-date-term.js';
+import type { FieldConfig, QueryBuilderOptions } from '../types.js';
 
-import { Filter } from './types';
+import type { Filter } from './types.js';
 
 type RangeValue = { from: string; to: string };
 

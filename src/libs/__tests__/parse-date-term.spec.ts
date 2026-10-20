@@ -1,6 +1,6 @@
 import { addDays, subDays, addWeeks, subWeeks } from 'date-fns';
 
-import { parseDateTerm } from '../parse-date-term';
+import { parseDateTerm } from '../parse-date-term.js';
 
 const NOW = new Date();
 

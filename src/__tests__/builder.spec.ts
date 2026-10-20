@@ -1,5 +1,5 @@
-import { QueryToOpenSearchBuilder } from '../builder';
-import { EntityConfig, OpenSearchFilters } from '../types';
+import { QueryToOpenSearchBuilder } from '../builder.js';
+import type { EntityConfig, OpenSearchFilters } from '../types.js';
 const resolveTagGroups = async (values: string[]): Promise<string[]> => {
 	const tagGroups: Record<string, string[]> = {
 		competitors: ['coke', 'pepsi'],

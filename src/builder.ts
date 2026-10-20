@@ -1,18 +1,18 @@
-import {
-	parse,
+import { parse } from 'search-query-parser';
+import type {
 	SearchParserOptions,
 	SearchParserResult,
 } from 'search-query-parser';
 
-import { Filters } from './filters';
-import { getQuotedTexts } from './libs/quoted-text';
-import {
+import { Filters } from './filters/index.js';
+import { getQuotedTexts } from './libs/quoted-text.js';
+import type {
 	BuildResponse,
 	EntityConfig,
 	OpenSearchQuery,
 	QueryBuilderOptions,
 	QueryBuilder,
-} from './types';
+} from './types.js';
 
 const OPTIONS: SearchParserOptions = {
 	offsets: false,

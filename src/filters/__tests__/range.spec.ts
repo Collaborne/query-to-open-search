@@ -1,5 +1,5 @@
-import { FieldConfig } from '../../types';
-import { RangeFilter } from '../range';
+import type { FieldConfig } from '../../types.js';
+import { RangeFilter } from '../range.js';
 
 describe('RangeFilter', () => {
 	test('adds range filters', async () => {

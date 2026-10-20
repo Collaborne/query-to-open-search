@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FieldConfig, QueryBuilderOptions } from '../types';
+import type { FieldConfig, QueryBuilderOptions } from '../types.js';
 
 export interface Filter<T = any> {
 	create(
