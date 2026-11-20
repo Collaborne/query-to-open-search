@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 
 import { QueryToOpenSearchBuilder } from '../builder.js';
 import type {
@@ -104,7 +104,7 @@ describe('QueryToOpenSearchBuilder vector search', () => {
 	});
 
 	test('skips vector search for empty queries', async () => {
-		const toEmbedding = jest
+		const toEmbedding = vi
 			.fn<() => Promise<number[]>>()
 			.mockResolvedValue([0.1, 0.2]);
 		const translator = new QueryToOpenSearchBuilder({
