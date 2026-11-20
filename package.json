@@ -1,6 +1,6 @@
 {
 	"name": "query-to-open-search",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Translates query strings into OpenSearch queries",
 	"type": "module",
 	"exports": {
