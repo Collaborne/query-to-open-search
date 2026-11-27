@@ -83,16 +83,16 @@ function localDateToUtc(params: {
 	year: number;
 	month: number;
 	day: number;
-	hour?: number;
-	minute?: number;
+	hour: number;
+	minute: number;
 	timeZone: string;
 }) {
 	const localAsUtc = Date.UTC(
 		params.year,
 		params.month - 1,
 		params.day,
-		params.hour ?? 0,
-		params.minute ?? 0,
+		params.hour,
+		params.minute,
 	);
 	let utcMs =
 		localAsUtc - getTimeZoneOffset(new Date(localAsUtc), params.timeZone);
@@ -124,7 +124,7 @@ function getWeekStartOffset(
 }
 
 function addLocalMonths(
-	date: Pick<LocalDateParts, 'year' | 'month' | 'day'>,
+	date: Pick<LocalDateParts, 'year' | 'month'>,
 	months: number,
 ) {
 	const utcDate = new Date(Date.UTC(date.year, date.month - 1, 1));
@@ -160,19 +160,17 @@ function getPeriodStart(
 		return addLocalDays(today, endpoint.periodOffset);
 	}
 	if (endpoint.period === 'm') {
-		const currentMonth = { year: today.year, month: today.month, day: 1 };
-		return addLocalMonths(currentMonth, endpoint.periodOffset);
+		return addLocalMonths(today, endpoint.periodOffset);
 	}
 	if (endpoint.period === 'q') {
 		const currentQuarter = {
 			year: today.year,
 			month: getQuarterStartMonth(today.month),
-			day: 1,
 		};
 		return addLocalMonths(currentQuarter, endpoint.periodOffset * 3);
 	}
 	if (endpoint.period === 'y') {
-		const currentYear = { year: today.year, month: 1, day: 1 };
+		const currentYear = { year: today.year, month: 1 };
 		return addLocalMonths(currentYear, endpoint.periodOffset * 12);
 	}
 

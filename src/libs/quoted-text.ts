@@ -4,15 +4,15 @@
  *
  * @see https://github.com/nepsilon/search-query-parser/issues/25
  */
-export function getQuotedTexts(text?: string) {
-	if (!text || text.length === 0) {
+export function getQuotedTexts(text: string) {
+	if (!text) {
 		return [];
 	}
 
 	// Find quoted text (but ignore if it's the value of a keyword query)
 	const regex = /(?<!\w:)"((?:[^"\\]|\\.)*)"/g;
 	const matches = text.match(regex);
-	if (!matches || matches.length === 0) {
+	if (!matches) {
 		return [];
 	}
 

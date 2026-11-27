@@ -39,7 +39,7 @@ function getFreeText(
 	parsedQuery: string | SearchParserResult,
 ): { freeText: string | undefined; quoted: boolean } {
 	const quotedText = getQuotedTexts(queryString);
-	if (quotedText && quotedText.length > 0) {
+	if (quotedText.length > 0) {
 		return { freeText: quotedText.join(' '), quoted: true };
 	}
 
@@ -110,20 +110,15 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 		const hasFreeText =
 			typeof freeText === 'string' && freeText.trim().length > 0;
 		const vectorSearch = this.entityConfig.vectorSearch;
-		const shouldUseVectorSearch =
-			Boolean(vectorSearch) && !quoted && hasFreeText;
+		const shouldUseVectorSearch = vectorSearch && !quoted && hasFreeText;
 		const useHybridMode =
-			shouldUseVectorSearch && vectorSearch?.mode === 'hybrid';
-		const prefixSearch = this.entityConfig.prefixSearch;
+			shouldUseVectorSearch && vectorSearch.mode === 'hybrid';
 
 		let traditionalSearchQuery: Record<string, unknown> | undefined;
 
-		if (hasFreeText && freeText) {
-			const canUsePrefixSearch =
-				Boolean(prefixSearch) &&
-				freeText.length >= (prefixSearch?.minChars ?? 1);
-
-			if (canUsePrefixSearch && prefixSearch) {
+		if (hasFreeText && (!shouldUseVectorSearch || useHybridMode)) {
+			const prefixSearch = this.entityConfig.prefixSearch;
+			if (prefixSearch && freeText.length >= (prefixSearch.minChars ?? 1)) {
 				const normalizedFreeText = freeText.toLowerCase();
 				const filters = prefixSearch.fields.map(field => ({
 					prefix: {
@@ -158,8 +153,8 @@ export class QueryToOpenSearchBuilder implements QueryBuilder {
 			}
 		}
 
-		if (shouldUseVectorSearch && vectorSearch && freeText) {
-			const inputEmbedding = await vectorSearch.toEmbedding(freeText ?? '');
+		if (shouldUseVectorSearch) {
+			const inputEmbedding = await vectorSearch.toEmbedding(freeText);
 			const vectorQuery = {
 				knn: {
 					[vectorSearch.embeddingField]: {

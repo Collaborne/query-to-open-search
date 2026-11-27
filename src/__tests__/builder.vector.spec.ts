@@ -20,10 +20,13 @@ const CONFIG: EntityConfig = {
 };
 
 describe('QueryToOpenSearchBuilder vector search', () => {
-	test('uses vector search', async () => {
+	test('uses vector search without building a text query', async () => {
 		const embedding = [0, 1];
+		const fields = [...CONFIG.traditionalSearch.fields];
+		const mapFields = vi.spyOn(fields, 'map');
 		const translator = new QueryToOpenSearchBuilder({
 			...CONFIG,
+			traditionalSearch: { fields },
 			vectorSearch: {
 				embeddingField: 'embeddingField',
 				toEmbedding: async () => embedding,
@@ -34,6 +37,7 @@ describe('QueryToOpenSearchBuilder vector search', () => {
 		const query = (await translator.build(queryString))
 			.query as OpenSearchVectorQuery;
 
+		expect(mapFields).not.toHaveBeenCalled();
 		expect(query.knn.embeddingField.vector).toEqual(embedding);
 		expect(query.knn.embeddingField.filter).toBeDefined();
 		expect(query.knn.embeddingField.filter!.bool.must).toEqual([
